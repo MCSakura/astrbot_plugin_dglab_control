@@ -1,0 +1,38 @@
+{
+  "ws_host": {
+    "description": "二维码里写入的访问地址（IP 或域名）",
+    "type": "string",
+    "default": "",
+    "hint": "APP 扫码后用来连插件的地址。可填 IP（如 192.168.1.10）或域名（如 dglab.example.com）；留空则自动取本机出网 IPv4。插件本身监听 0.0.0.0，所以 APP 能用任意本机可达 IP 连入。"
+  },
+  "v3_port": {
+    "description": "V3 协议监听端口",
+    "type": "int",
+    "default": 9999,
+    "hint": "插件内嵌 V3 Server 监听端口，沿用官方默认 9999。被占用时改成其他空闲端口。"
+  },
+  "v4_port": {
+    "description": "V4 协议监听端口",
+    "type": "int",
+    "default": 9998,
+    "hint": "插件内嵌 V4 Server 监听端口，沿用官方默认 9998。被占用时改成其他空闲端口。"
+  },
+  "default_intensity": {
+    "description": "一键开火默认强度",
+    "type": "int",
+    "default": 15,
+    "hint": "/郊狼开火、/郊狼A开、/郊狼B开 未显式传强度时的默认值。建议 5–30，最大不超过 200。"
+  },
+  "fire_duration_ms": {
+    "description": "一键开火持续时长（毫秒）",
+    "type": "int",
+    "default": 3000,
+    "hint": "开火后该强度的持续时间，结束后自动归零。V4 通过 SetTempIntensity 原生支持；V3 用 set_strength + 定时 clear 模拟。"
+  },
+  "admin_only": {
+    "description": "控制类指令仅机器人管理员可用",
+    "type": "bool",
+    "default": true,
+    "hint": "开启后仅 /郊狼开火、/郊狼A开、/郊狼A关、/郊狼B开、/郊狼B关 需要机器人管理员权限。/郊狼二维码、/郊狼查询 始终所有人可用。"
+  }
+}
