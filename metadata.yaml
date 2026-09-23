@@ -1,7 +1,7 @@
 name: astrbot_plugin_dglab_control
 display_name: 郊狼控制插件
 desc: 通过机器人控制郊狼 DG-LAB 硬件实现电击。插件内嵌 V3/V4 WebSocket Server，无需外部中转服务；支持扫码连接、一键开火、A/B 通道单独开关、查询已连接 APP。
-version: 1.0.0
+version: 1.0.1
 author: mcsakura_樱佬
 support_platforms:
   - aiocqhttp

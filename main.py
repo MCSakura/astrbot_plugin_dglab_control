@@ -15,18 +15,18 @@ A/B 通道单独开关、查询已连接 APP 以及发送 V3/V4 配对二维码�
 """
 
 import json
-import logging
 import os
 import secrets
+import shutil
 import socket
 import urllib.parse
 import uuid
 from typing import List, Optional, Tuple
 
 import astrbot.api.star as star
-from astrbot.api.star import Context
+from astrbot.api.star import Context, StarTools
 from astrbot.api.event import filter, AstrMessageEvent
-from astrbot.api import AstrBotConfig
+from astrbot.api import AstrBotConfig, logger
 
 try:  # AstrBot 包方式加载
     from .dglab_server import DglabError, DglabV3Server, DglabV4Server
@@ -34,8 +34,6 @@ try:  # AstrBot 包方式加载
 except ImportError:  # 脚本方式调试
     from dglab_server import DglabError, DglabV3Server, DglabV4Server
     from qrcode_util import make_qrcode_image
-
-logger = logging.getLogger("astrbot")
 
 # DG-LAB APP 跳转二维码 URL 模板
 _V3_QRCODE_TEMPLATE = (
@@ -52,12 +50,16 @@ class DglabControlPlugin(star.Star):
         super().__init__(context)
         self.config = config if isinstance(config, dict) else {}
 
+        # 二维码 PNG 属临时产物，留在插件目录下的 cache/
         self._cache_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "cache"
         )
         os.makedirs(self._cache_dir, exist_ok=True)
         self._v3_qr_path = os.path.join(self._cache_dir, "v3_qrcode.png")
         self._v4_qr_path = os.path.join(self._cache_dir, "v4_qrcode.png")
+
+        # 持久化数据（target_id.json）必须落在 data/plugin_data/<插件名>/ 下
+        self._data_dir = str(StarTools.get_data_dir())
 
         self._v3: Optional[DglabV3Server] = None
         self._v4: Optional[DglabV4Server] = None
@@ -87,7 +89,17 @@ class DglabControlPlugin(star.Star):
         targetId 一旦变化，之前发的二维码就会失效，所以必须落盘并在日志里
         区分「从磁盘加载」还是「新生成」，方便排查持久化是否生效。
         """
-        path = os.path.join(self._cache_dir, "target_id.json")
+        path = os.path.join(self._data_dir, "target_id.json")
+        # 兼容旧版本：target_id.json 原先存在插件目录 cache/ 下，
+        # 若旧文件存在而新位置尚无，则自动迁移到 data/plugin_data 下，
+        # 避免用户升级后 targetId 变化、已发二维码失效。
+        legacy_path = os.path.join(self._cache_dir, "target_id.json")
+        if os.path.exists(legacy_path) and not os.path.exists(path):
+            try:
+                shutil.move(legacy_path, path)
+                logger.info(f"[郊狼] 已迁移旧版 targetId：{legacy_path} -> {path}")
+            except Exception as e:  # noqa: BLE001
+                logger.warning(f"[郊狼] 迁移旧版 targetId 失败（{legacy_path}）：{e}")
         v3_id = ""
         v4_id = ""
         loaded = False

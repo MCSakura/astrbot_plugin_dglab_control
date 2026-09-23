@@ -21,7 +21,6 @@ V4 协议（参考 v4-server.ts）：
 
 import asyncio
 import json
-import logging
 import secrets
 import time
 import uuid
@@ -29,6 +28,8 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
 
 import websockets
+
+from astrbot.api import logger as _astrbot_logger
 
 
 class DglabError(Exception):
@@ -131,10 +132,10 @@ class DglabV3Server:
     下发强度 / clear 指令，做 type=4 → msg 的格式转换。
     """
 
-    def __init__(self, port: int, target_id: str, logger: logging.Logger):
+    def __init__(self, port: int, target_id: str, logger=None):
         self.port = port
         self.target_id = target_id  # 控制方 targetId，UUID 持久化
-        self.logger = logger or logging.getLogger("dglab-v3")
+        self.logger = logger or _astrbot_logger
 
         self._server: Optional[websockets.WebSocketServer] = None
         self._heartbeat_task: Optional[asyncio.Task] = None
@@ -390,10 +391,10 @@ class DglabV4Server:
     下发 message 帧（内含 device.op RPC），并匹配 reqId 等待 APP 响应。
     """
 
-    def __init__(self, port: int, target_id: str, logger: logging.Logger):
+    def __init__(self, port: int, target_id: str, logger=None):
         self.port = port
         self.target_id = target_id  # 控制方 targetId，8hex 持久化
-        self.logger = logger or logging.getLogger("dglab-v4")
+        self.logger = logger or _astrbot_logger
 
         self._server: Optional[websockets.WebSocketServer] = None
         self._heartbeat_task: Optional[asyncio.Task] = None

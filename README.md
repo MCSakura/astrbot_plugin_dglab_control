@@ -16,7 +16,7 @@ A/B 通道独立开关、查询已连接 APP。
 | 一键开火 | `/郊狼开火 [A] [B]`，未传强度时用配置的默认值（默认 15） |
 | 通道独立控制 | A/B 通道可分别开启（指定强度）与关闭 |
 | 连接查询 | `/郊狼查询` 列出已接入 APP、设备槽位、监听状态 |
-| targetId 持久化 | 存于 `cache/target_id.json`，重启后二维码不失效 |
+| targetId 持久化 | 存于 `data/plugin_data/astrbot_plugin_dglab_control/target_id.json`，重启后二维码不失效 |
 | 自动探测本机 IP | `ws_host` 留空时自动取本机出网 IPv4 |
 | 分级权限 | `/郊狼二维码`、`/郊狼查询` 所有人可用；控制类指令仅机器人管理员 |
 
@@ -51,8 +51,8 @@ A/B 通道独立开关、查询已连接 APP。
 [郊狼] 已启动内置 Server：V3=ws://<host>:9999/<v3_id>，V4=ws://<host>:9998?tid=<v4_id>，等待 APP 扫码接入。
 ```
 
-> **Docker 部署注意**：插件目录必须挂载为**持久卷**，否则容器重建后
-> `cache/target_id.json` 丢失，targetId 会变，之前发出去的二维码全部失效。
+> **Docker 部署注意**：需确保 AstrBot 的 `data/` 目录（含 `data/plugin_data/astrbot_plugin_dglab_control/target_id.json`）
+> 挂载为持久卷，否则容器重建后 targetId 丢失，之前发出去的二维码全部失效。
 
 ---
 
@@ -164,8 +164,8 @@ V4: https://dungeon-lab.cn/s/?v=1&action=socket&url={urlencode(ws_url)}
 
 ### 6. 每次重启插件 targetId 都变
 
-**原因**：`cache/target_id.json` 未成功落盘（常见于 Docker 未挂载持久卷、
-或插件目录不可写）。
+**原因**：`data/plugin_data/astrbot_plugin_dglab_control/target_id.json` 未成功落盘
+（常见于 Docker 未挂载持久卷、或插件数据目录不可写）。
 
 **排查**：启动日志会明确区分：
 - `[郊狼] 已从磁盘加载 targetId：<路径>`
@@ -197,7 +197,10 @@ astrbot_plugin_dglab_control/
 ├── _conf_schema.json   # WebUI 配置项定义
 ├── metadata.yaml       # 插件元数据
 ├── requirements.txt    # 运行时依赖
-└── cache/              # 运行时生成：target_id.json、v3_qrcode.png、v4_qrcode.png
+└── cache/              # 运行时临时产物：v3_qrcode.png、v4_qrcode.png
+
+# 持久化数据（不在插件目录内，由 AstrBot 管理）：
+# data/plugin_data/astrbot_plugin_dglab_control/target_id.json
 ```
 
 ---

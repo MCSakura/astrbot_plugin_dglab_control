@@ -8,6 +8,9 @@ venv/
 # 运行时生成（二维码图片、targetId 持久化文件）
 cache/
 
+# 本地运行 AstrBot 时在插件目录产生的运行时数据
+data/
+
 # IDE / 系统
 .idea/
 .vscode/
